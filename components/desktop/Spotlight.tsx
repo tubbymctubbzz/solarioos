@@ -194,7 +194,7 @@ export default function Spotlight({ onClose, onOpenWindow }: SpotlightProps) {
             ) : (
               <div className="p-8 text-center text-gray-500">
                 <Search className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                <div>No results found for "{query}"</div>
+                <div>No results found for &quot;{query}&quot;</div>
               </div>
             )}
           </div>

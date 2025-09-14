@@ -17,82 +17,82 @@ interface PreferenceCategory {
 
 export default function SystemPreferencesApp({ windowId, isDarkMode = false }: SystemPreferencesAppProps) {
   const [selectedCategory, setSelectedCategory] = useState("general");
-  
+
   // Detect system dark mode
   const [systemDarkMode, setSystemDarkMode] = useState(false);
-  
+
   useEffect(() => {
     const detectDarkMode = () => {
       const savedDarkMode = localStorage.getItem('solario_dark_mode') === 'true';
       const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setSystemDarkMode(savedDarkMode || systemDark);
     };
-    
+
     detectDarkMode();
-    
+
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     mediaQuery.addEventListener('change', detectDarkMode);
-    
+
     return () => mediaQuery.removeEventListener('change', detectDarkMode);
   }, []);
-  
+
   const currentDarkMode = isDarkMode || systemDarkMode;
-  
+
   const [settings, setSettings] = useState({
     // General
     computerName: "MacBook-Pro-of-Infinite-Procrastination",
     darkMode: false,
     accentColor: "blue",
-    
+
     // Display
     resolution: "2560x1600",
     brightness: 75,
     nightShift: false,
-    
+
     // Sound
     outputVolume: 50,
     inputVolume: 75,
     soundEffects: true,
-    
+
     // Network
     wifi: true,
     bluetooth: true,
-    
+
     // Security
     firewall: true,
     fileVault: false,
     automaticLogin: false,
-    
+
     // Energy Saver
     displaySleep: 10,
     computerSleep: 30,
     preventSleep: false,
-    
+
     // Users
     allowGuests: false,
     fastUserSwitching: true,
-    
+
     // Accessibility
     voiceOver: false,
     zoom: false,
     increaseContrast: false,
     reduceMotion: false,
-    
+
     // Privacy & Security
     locationServices: true,
     analytics: false,
     crashReports: true,
-    
+
     // Gaming
     gameMode: false,
     hdrGaming: true,
     gameBar: true,
-    
+
     // AI & Machine Learning
     aiAssistant: true,
     smartSuggestions: true,
     voiceRecognition: true,
-    
+
     // Advanced
     developerMode: false,
     experimentalFeatures: false,
@@ -217,12 +217,12 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
     }
   ];
 
-  const updateSetting = (key: string, value: any) => {
+  const handleSettingChange = (key: string, value: boolean | string | number) => {
     setSettings(prev => ({ ...prev, [key]: value }));
-    
+
     // Save to localStorage
     localStorage.setItem(`solario_${key}`, JSON.stringify(value));
-    
+
     // Apply certain settings immediately
     if (key === "darkMode") {
       localStorage.setItem('solario_dark_mode', value.toString());
@@ -236,23 +236,23 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
       // Dispatch event to notify other components
       window.dispatchEvent(new CustomEvent('darkModeChanged', { detail: value }));
     }
-    
+
     if (key === "brightness") {
       document.body.style.filter = `brightness(${value}%)`;
     }
-    
+
     if (key === "nightShift" && value) {
       document.body.style.filter = (document.body.style.filter || '') + ' sepia(20%) hue-rotate(-10deg)';
     } else if (key === "nightShift" && !value) {
       document.body.style.filter = document.body.style.filter.replace(/ sepia\(20%\) hue-rotate\(-10deg\)/g, '');
     }
-    
+
     if (key === "increaseContrast" && value) {
       document.body.style.filter = (document.body.style.filter || '') + ' contrast(150%)';
     } else if (key === "increaseContrast" && !value) {
       document.body.style.filter = document.body.style.filter.replace(/ contrast\(150%\)/g, '');
     }
-    
+
     if (key === "reduceMotion") {
       if (value) {
         document.documentElement.style.setProperty('--animation-duration', '0s');
@@ -262,7 +262,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
         document.documentElement.style.removeProperty('transition-duration');
       }
     }
-    
+
     if (key === "gameMode" && value) {
       document.body.style.filter = (document.body.style.filter || '') + ' saturate(120%) contrast(110%)';
     } else if (key === "gameMode" && !value) {
@@ -282,21 +282,21 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
               <input
                 type="text"
                 value={settings.computerName}
-                onChange={(e) => updateSetting("computerName", e.target.value)}
+                onChange={(e) => handleSettingChange("computerName", e.target.value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  currentDarkMode 
-                    ? 'bg-gray-800 border-gray-600 text-white' 
+                  currentDarkMode
+                    ? 'bg-gray-800 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-900'
                 }`}
               />
             </div>
-            
+
             <div>
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={settings.darkMode}
-                  onChange={(e) => updateSetting("darkMode", e.target.checked)}
+                  onChange={(e) => handleSettingChange("darkMode", e.target.checked)}
                   className="rounded"
                 />
                 <span className={currentDarkMode ? 'text-white' : 'text-gray-900'}>
@@ -313,10 +313,10 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 {["blue", "purple", "pink", "red", "orange", "yellow", "green"].map(color => (
                   <button
                     key={color}
-                    onClick={() => updateSetting("accentColor", color)}
+                    onClick={() => handleSettingChange("accentColor", color)}
                     className={`w-8 h-8 rounded-full bg-${color}-500 transition-all hover:scale-110 ${
-                      settings.accentColor === color 
-                        ? 'ring-2 ring-offset-2 ring-blue-400' 
+                      settings.accentColor === color
+                        ? 'ring-2 ring-offset-2 ring-blue-400'
                         : 'hover:ring-2 hover:ring-offset-2 hover:ring-gray-400'
                     }`}
                   />
@@ -333,7 +333,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
               <label className="block text-sm font-medium text-gray-700 mb-2">Resolution</label>
               <select
                 value={settings.resolution}
-                onChange={(e) => updateSetting("resolution", e.target.value)}
+                onChange={(e) => handleSettingChange("resolution", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="1920x1080">1920 × 1080</option>
@@ -351,7 +351,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 min="0"
                 max="100"
                 value={settings.brightness}
-                onChange={(e) => updateSetting("brightness", Number(e.target.value))}
+                onChange={(e) => handleSettingChange("brightness", Number(e.target.value))}
                 className="w-full"
               />
             </div>
@@ -361,7 +361,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 <input
                   type="checkbox"
                   checked={settings.nightShift}
-                  onChange={(e) => updateSetting("nightShift", e.target.checked)}
+                  onChange={(e) => handleSettingChange("nightShift", e.target.checked)}
                   className="rounded"
                 />
                 <span>Night Shift</span>
@@ -385,7 +385,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 min="0"
                 max="100"
                 value={settings.outputVolume}
-                onChange={(e) => updateSetting("outputVolume", Number(e.target.value))}
+                onChange={(e) => handleSettingChange("outputVolume", Number(e.target.value))}
                 className="w-full"
               />
             </div>
@@ -399,7 +399,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 min="0"
                 max="100"
                 value={settings.inputVolume}
-                onChange={(e) => updateSetting("inputVolume", Number(e.target.value))}
+                onChange={(e) => handleSettingChange("inputVolume", Number(e.target.value))}
                 className="w-full"
               />
             </div>
@@ -409,7 +409,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 <input
                   type="checkbox"
                   checked={settings.soundEffects}
-                  onChange={(e) => updateSetting("soundEffects", e.target.checked)}
+                  onChange={(e) => handleSettingChange("soundEffects", e.target.checked)}
                   className="rounded"
                 />
                 <span>Play user interface sound effects</span>
@@ -422,8 +422,8 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
         return (
           <div className="space-y-6">
             <div className={`border rounded-lg p-4 ${
-              settings.wifi 
-                ? 'bg-green-50 border-green-200' 
+              settings.wifi
+                ? 'bg-green-50 border-green-200'
                 : 'bg-red-50 border-red-200'
             }`}>
               <div className="flex items-center space-x-2">
@@ -444,19 +444,19 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 <input
                   type="checkbox"
                   checked={settings.wifi}
-                  onChange={(e) => updateSetting("wifi", e.target.checked)}
+                  onChange={(e) => handleSettingChange("wifi", e.target.checked)}
                   className="rounded"
                 />
                 <span>Wi-Fi</span>
               </label>
             </div>
-            
+
             <div>
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={settings.bluetooth}
-                  onChange={(e) => updateSetting("bluetooth", e.target.checked)}
+                  onChange={(e) => handleSettingChange("bluetooth", e.target.checked)}
                   className="rounded"
                 />
                 <span>Bluetooth</span>
@@ -496,17 +496,17 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                   <input
                     type="checkbox"
                     checked={settings.firewall}
-                    onChange={(e) => updateSetting("firewall", e.target.checked)}
+                    onChange={(e) => handleSettingChange("firewall", e.target.checked)}
                     className="rounded"
                   />
                   <span>Enable Firewall</span>
                 </label>
-                
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     checked={settings.fileVault}
-                    onChange={(e) => updateSetting("fileVault", e.target.checked)}
+                    onChange={(e) => handleSettingChange("fileVault", e.target.checked)}
                     className="rounded"
                   />
                   <span>FileVault (Disk Encryption)</span>
@@ -540,7 +540,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 min="1"
                 max="60"
                 value={settings.displaySleep}
-                onChange={(e) => updateSetting("displaySleep", Number(e.target.value))}
+                onChange={(e) => handleSettingChange("displaySleep", Number(e.target.value))}
                 className="w-full"
               />
             </div>
@@ -554,7 +554,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 min="1"
                 max="180"
                 value={settings.computerSleep}
-                onChange={(e) => updateSetting("computerSleep", Number(e.target.value))}
+                onChange={(e) => handleSettingChange("computerSleep", Number(e.target.value))}
                 className="w-full"
               />
             </div>
@@ -564,7 +564,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 <input
                   type="checkbox"
                   checked={settings.preventSleep}
-                  onChange={(e) => updateSetting("preventSleep", e.target.checked)}
+                  onChange={(e) => handleSettingChange("preventSleep", e.target.checked)}
                   className="rounded"
                 />
                 <span>Prevent computer from sleeping automatically when display is off</span>
@@ -583,27 +583,27 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                   <input
                     type="checkbox"
                     checked={settings.voiceOver}
-                    onChange={(e) => updateSetting("voiceOver", e.target.checked)}
+                    onChange={(e) => handleSettingChange("voiceOver", e.target.checked)}
                     className="rounded"
                   />
                   <span>VoiceOver</span>
                 </label>
-                
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     checked={settings.zoom}
-                    onChange={(e) => updateSetting("zoom", e.target.checked)}
+                    onChange={(e) => handleSettingChange("zoom", e.target.checked)}
                     className="rounded"
                   />
                   <span>Zoom</span>
                 </label>
-                
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     checked={settings.increaseContrast}
-                    onChange={(e) => updateSetting("increaseContrast", e.target.checked)}
+                    onChange={(e) => handleSettingChange("increaseContrast", e.target.checked)}
                     className="rounded"
                   />
                   <span>Increase Contrast</span>
@@ -617,7 +617,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 <input
                   type="checkbox"
                   checked={settings.reduceMotion}
-                  onChange={(e) => updateSetting("reduceMotion", e.target.checked)}
+                  onChange={(e) => handleSettingChange("reduceMotion", e.target.checked)}
                   className="rounded"
                 />
                 <span>Reduce Motion</span>
@@ -637,7 +637,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 <input
                   type="checkbox"
                   checked={settings.locationServices}
-                  onChange={(e) => updateSetting("locationServices", e.target.checked)}
+                  onChange={(e) => handleSettingChange("locationServices", e.target.checked)}
                   className="rounded"
                 />
                 <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
@@ -645,7 +645,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 </span>
               </label>
             </div>
-            
+
             <div>
               <h3 className={`font-medium mb-3 ${
                 currentDarkMode ? 'text-white' : 'text-gray-900'
@@ -655,19 +655,19 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                   <input
                     type="checkbox"
                     checked={settings.analytics}
-                    onChange={(e) => updateSetting("analytics", e.target.checked)}
+                    onChange={(e) => handleSettingChange("analytics", e.target.checked)}
                     className="rounded"
                   />
                   <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
                     Share Analytics Data
                   </span>
                 </label>
-                
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     checked={settings.crashReports}
-                    onChange={(e) => updateSetting("crashReports", e.target.checked)}
+                    onChange={(e) => handleSettingChange("crashReports", e.target.checked)}
                     className="rounded"
                   />
                   <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
@@ -690,7 +690,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 <input
                   type="checkbox"
                   checked={settings.gameMode}
-                  onChange={(e) => updateSetting("gameMode", e.target.checked)}
+                  onChange={(e) => handleSettingChange("gameMode", e.target.checked)}
                   className="rounded"
                 />
                 <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
@@ -698,7 +698,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 </span>
               </label>
             </div>
-            
+
             <div>
               <h3 className={`font-medium mb-3 ${
                 currentDarkMode ? 'text-white' : 'text-gray-900'
@@ -708,19 +708,19 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                   <input
                     type="checkbox"
                     checked={settings.hdrGaming}
-                    onChange={(e) => updateSetting("hdrGaming", e.target.checked)}
+                    onChange={(e) => handleSettingChange("hdrGaming", e.target.checked)}
                     className="rounded"
                   />
                   <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
                     HDR Gaming Support
                   </span>
                 </label>
-                
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     checked={settings.gameBar}
-                    onChange={(e) => updateSetting("gameBar", e.target.checked)}
+                    onChange={(e) => handleSettingChange("gameBar", e.target.checked)}
                     className="rounded"
                   />
                   <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
@@ -743,7 +743,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 <input
                   type="checkbox"
                   checked={settings.aiAssistant}
-                  onChange={(e) => updateSetting("aiAssistant", e.target.checked)}
+                  onChange={(e) => handleSettingChange("aiAssistant", e.target.checked)}
                   className="rounded"
                 />
                 <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
@@ -751,7 +751,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 </span>
               </label>
             </div>
-            
+
             <div>
               <h3 className={`font-medium mb-3 ${
                 currentDarkMode ? 'text-white' : 'text-gray-900'
@@ -761,19 +761,19 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                   <input
                     type="checkbox"
                     checked={settings.smartSuggestions}
-                    onChange={(e) => updateSetting("smartSuggestions", e.target.checked)}
+                    onChange={(e) => handleSettingChange("smartSuggestions", e.target.checked)}
                     className="rounded"
                   />
                   <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
                     Smart Suggestions
                   </span>
                 </label>
-                
+
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     checked={settings.voiceRecognition}
-                    onChange={(e) => updateSetting("voiceRecognition", e.target.checked)}
+                    onChange={(e) => handleSettingChange("voiceRecognition", e.target.checked)}
                     className="rounded"
                   />
                   <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
@@ -805,37 +805,37 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 These settings are for advanced users only. Changing them may affect system stability.
               </p>
             </div>
-            
+
             <div className="space-y-3">
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={settings.developerMode}
-                  onChange={(e) => updateSetting("developerMode", e.target.checked)}
+                  onChange={(e) => handleSettingChange("developerMode", e.target.checked)}
                   className="rounded"
                 />
                 <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
                   Developer Mode
                 </span>
               </label>
-              
+
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={settings.experimentalFeatures}
-                  onChange={(e) => updateSetting("experimentalFeatures", e.target.checked)}
+                  onChange={(e) => handleSettingChange("experimentalFeatures", e.target.checked)}
                   className="rounded"
                 />
                 <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
                   Experimental Features
                 </span>
               </label>
-              
+
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={settings.debugMode}
-                  onChange={(e) => updateSetting("debugMode", e.target.checked)}
+                  onChange={(e) => handleSettingChange("debugMode", e.target.checked)}
                   className="rounded"
                 />
                 <span className={currentDarkMode ? 'text-gray-300' : 'text-gray-700'}>
@@ -871,8 +871,8 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
     }`}>
       {/* Sidebar */}
       <div className={`w-80 border-r overflow-y-auto ${
-        currentDarkMode 
-          ? 'bg-gray-800 border-gray-700' 
+        currentDarkMode
+          ? 'bg-gray-800 border-gray-700'
           : 'bg-white border-gray-200'
       }`}>
         <div className="p-6">
@@ -887,8 +887,8 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
                 className={`p-4 rounded-lg text-left transition-colors border-2 ${
                   selectedCategory === category.id
                     ? (currentDarkMode ? 'bg-blue-900 border-blue-400' : 'bg-blue-100 border-blue-500')
-                    : (currentDarkMode 
-                      ? 'bg-gray-700 hover:bg-gray-600 border-transparent' 
+                    : (currentDarkMode
+                      ? 'bg-gray-700 hover:bg-gray-600 border-transparent'
                       : 'bg-gray-50 hover:bg-gray-100 border-transparent')
                 }`}
               >
@@ -927,7 +927,7 @@ export default function SystemPreferencesApp({ windowId, isDarkMode = false }: S
             }`}>
               {categories.find(c => c.id === selectedCategory)?.description}
             </p>
-            
+
             {renderCategoryContent()}
           </div>
         </div>

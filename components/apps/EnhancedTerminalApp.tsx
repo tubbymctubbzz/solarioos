@@ -73,7 +73,7 @@ export default function EnhancedTerminalApp({ windowId, isDarkMode = false }: Te
     const platform = navigator.platform;
     const language = navigator.language;
     const cores = navigator.hardwareConcurrency || 'Unknown';
-    const memory = (navigator as any).deviceMemory || 'Unknown';
+    const memory = (navigator as { deviceMemory?: number }).deviceMemory || 'Unknown';
     
     return {
       os: platform,
@@ -237,7 +237,7 @@ Uptime: ${Math.floor(sysInfo.uptime / 3600)}h ${Math.floor((sysInfo.uptime % 360
 tmpfs            2097152  102400   1994752   5% /tmp`;
 
       case 'free':
-        const memInfo = getSystemInfo();
+        // const memInfo = getSystemInfo();
         return `              total        used        free      shared
 Mem:        8388608     4194304     4194304           0
 Swap:       2097152           0     2097152`;
